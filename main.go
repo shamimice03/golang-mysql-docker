@@ -53,38 +53,53 @@ func main() {
 
 	fmt.Println("Connected")
 
-	albums, err := albumByArtist("John Coltrane")
+	// retrieve by artistName ( Mutiple Query )
+	albums, err := albumByArtist("Warfezz")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("Albums found: %v\n", albums)
-}
 
-func albumByArtist(name string) ([]Album, error) {
-	var albums []Album
+	// retrieve by ID ( single query)
+	alb, err := albumByID(2)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Album found: %v\n", alb)
 
-	rows, err := db.Query("SELECT * FROM album WHERE artist = ?", name)
+	// add new album
+	newAlbum := Album{
+		Title:  "The Modern Sound of Betty Carter",
+		Artist: "Betty Carter",
+		Price:  49.99,
+	}
+
+	newAlbumId, err := addAlbum(newAlbum)
 
 	if err != nil {
-		return nil, fmt.Errorf("albumByArtist %q: %v", name, err)
+		log.Fatal(err)
 	}
 
-	defer rows.Close()
+	fmt.Printf("ID of added album %v\n", newAlbumId)
 
-	//fmt.Println(rows)
+	// delete by ID
+	deleteStatus, err := deleteAlbum(3)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Number of Row Delete %v\n", deleteStatus)
 
-	for rows.Next() {
-		var alb Album
-		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
-			return nil, fmt.Errorf("albumByArtist %q: %v", name, err)
-		}
-		albums = append(albums, alb)
+	// update by ID
+	updateAlb := Album{
+		Title:  "Obak Valobasha",
+		Artist: "Warfezz",
+		Price:  60,
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("albumByArtist %q: %v", name, err)
+	updateStatus, err := updateAlbum(4, updateAlb)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	return albums, nil
+	fmt.Printf("Row updated %v\n", updateStatus)
 
 }
